@@ -636,6 +636,30 @@
     try{ return decodeURIComponent(escape(atob(s.replace(/-/g,'+').replace(/_/g,'/')))); }
     catch(e){ return ''; }
   }
+  /* Lê valor digitado em qualquer formato e devolve número.
+     "871" -> 871 | "871,00" -> 871 | "871.00" -> 871
+     "1.871,50" -> 1871.5 | "1,871.50" -> 1871.5 | "R$ 209,90" -> 209.9
+     Regra: o ÚLTIMO separador manda. Se tiver 3 casas depois dele
+     e não for o fim da string, é separador de milhar. */
+  function paraNumero(v){
+    if(!v) return NaN;
+    let s = String(v).trim().replace(/[R$\s\u00A0]/g,'');
+    const ultVirg = s.lastIndexOf(',');
+    const ultPto  = s.lastIndexOf('.');
+    const dec = Math.max(ultVirg, ultPto);
+    if(dec === -1){
+      s = s.replace(/\D/g,'');
+    } else {
+      const casas = s.length - dec - 1;
+      if(casas === 3 && s.length - 1 !== dec){
+        s = s.replace(/[.,]/g,'');
+      } else {
+        s = s.slice(0,dec).replace(/[.,]/g,'') + '.' + s.slice(dec+1).replace(/\D/g,'');
+      }
+    }
+    const n = parseFloat(s);
+    return isNaN(n) ? NaN : n;
+  }
   function moeda(v){
     const n = parseFloat(v);
     return isNaN(n) ? null : n.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
@@ -854,13 +878,13 @@
 
       const titulo = $('titulo').value.trim();
       const desc = $('descProd').value.trim();
-      const valorManual = $('valorManual').value.trim().replace(/\./g,'').replace(',', '.');
+      const valorManual = paraNumero($('valorManual').value);
       const tipoEnt = $('tipoEntrega').value;
       const obsEnt = $('obsEntrega').value.trim();
 
       if(titulo) partes.push('t=' + paraB64(titulo));
       if(desc) partes.push('d=' + paraB64(desc));
-      if(valorManual && !isNaN(parseFloat(valorManual))) partes.push('v=' + parseFloat(valorManual).toFixed(2));
+      if(!isNaN(valorManual) && valorManual > 0) partes.push('v=' + valorManual.toFixed(2));
       if(obsEnt || tipoEnt !== 'retirada'){
         partes.push('et=' + tipoEnt);
         if(obsEnt) partes.push('eo=' + paraB64(obsEnt));
