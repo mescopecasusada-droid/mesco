@@ -165,16 +165,36 @@
   .painel-aba.ativa{display:block}
   .nav-abas{display:flex;gap:10px;margin-top:24px}
 
-  .selo-loja{
-    position:relative;margin-top:2px;font-size:12.5px;font-weight:700;color:var(--ok);
-    text-transform:uppercase;letter-spacing:.08em;
-    display:flex;align-items:center;justify-content:center;gap:6px;
+  .badge-seguro{
+    position:relative;display:inline-flex;align-items:center;gap:7px;
+    margin-top:4px;padding:7px 14px 7px 10px;border-radius:999px;
+    background:rgba(235,230,25,0.08);border:1px solid rgba(235,230,25,0.35);
+    font-size:12px;font-weight:700;color:var(--amarelo);
+    text-transform:uppercase;letter-spacing:.09em;
   }
-  .selo-loja::before{content:"✓";font-weight:700}
-  .garantia{
-    position:relative;margin-top:10px;font-size:12.5px;color:var(--cinza);
-    max-width:34ch;margin-left:auto;margin-right:auto;line-height:1.5;
+  .badge-seguro svg{flex:0 0 auto;width:16px;height:16px}
+  .cartao-confianca{
+    background:var(--card);border:1px dashed var(--aco);border-radius:var(--radius);
+    padding:22px 22px;margin-top:20px;
   }
+  .cartao-confianca h3{
+    font-family:'Archivo',sans-serif;font-size:14.5px;font-weight:700;color:var(--osso);
+    line-height:1.45;margin-bottom:16px;
+  }
+  .lista-confianca{list-style:none}
+  .lista-confianca li{
+    display:flex;align-items:flex-start;gap:11px;font-size:13.5px;color:var(--osso);
+    line-height:1.5;
+  }
+  .lista-confianca li + li{margin-top:12px}
+  .lista-confianca svg{flex:0 0 auto;width:18px;height:18px;margin-top:1px}
+  .cartao-privacidade{
+    display:flex;gap:12px;margin-top:14px;padding:16px 18px;
+    background:#141410;border:1px solid var(--aco);border-left:3px solid var(--amarelo);
+    border-radius:var(--radius-sm);
+  }
+  .cartao-privacidade svg{flex:0 0 auto;width:18px;height:18px;margin-top:2px;color:var(--cinza)}
+  .cartao-privacidade p{font-size:12.5px;color:var(--cinza);line-height:1.65}
 
   .rodape-checkout{
     margin-top:32px;padding:24px 4px 4px;border-top:1px solid var(--aco);
@@ -183,12 +203,16 @@
   .logo-rodape{display:block;width:36px;height:36px;flex:0 0 auto;border-radius:50%;opacity:.9}
   .rodape-checkout p{font-size:12.5px;color:var(--cinza);line-height:1.6}
 
-  .valor .titulo-produto{font-family:'Archivo',sans-serif;font-size:21px;font-weight:700;margin-bottom:6px;line-height:1.25}
+  .valor .titulo-produto{
+    font-family:'Archivo',sans-serif;font-size:24px;font-weight:800;margin-bottom:8px;line-height:1.25;
+    color:var(--amarelo);text-transform:uppercase;letter-spacing:.02em;
+  }
   .valor .desc-produto{font-size:14px;color:var(--cinza);margin-bottom:18px;max-width:52ch}
   .valor .rotulo-valor{font-size:12.5px;color:var(--cinza);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px}
   .valor .cifra{
     font-family:'Archivo',sans-serif;font-size:44px;font-weight:800;color:var(--amarelo);line-height:1;
   }
+  .valor .cifra.combinar{font-size:20px;font-weight:700;color:var(--osso)}
   .entrega-info{
     margin-top:16px;padding:13px 15px;background:#1C1C18;border:1px solid var(--aco);
     border-left:4px solid var(--ambar);border-radius:var(--radius-sm);
@@ -232,10 +256,6 @@
   }
   .msg-erro{color:#FFC3B4;font-size:12.5px;margin-top:7px;display:none}
   .msg-erro.visivel{display:block}
-  .privacidade{
-    margin-top:18px;font-size:12.5px;color:var(--cinza);
-    line-height:1.6;border-left:2px solid var(--aco);padding-left:12px;
-  }
   .cep-status{font-size:12.5px;color:var(--cinza);margin:-8px 0 18px;display:none}
   .cep-status.visivel{display:block}
   .cep-status.ok{color:var(--ok)}
@@ -362,16 +382,39 @@
   <header class="hero">
     <img id="logoCheckout" class="logo-hero" alt="MESCO Peças Usadas — desde 1961" width="150" height="150">
     <div class="hero-marca">MESCO Peças Usadas</div>
-    <div class="selo-loja">PAGAMENTO SEGURO</div>
-    <p class="garantia">Se a peça não chegar até você, seu dinheiro é devolvido.</p>
+    <div class="badge-seguro">
+      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 2l7.5 3.2v5.4c0 5-3.2 8.9-7.5 10.4-4.3-1.5-7.5-5.4-7.5-10.4V5.2L12 2z" fill="currentColor" fill-opacity="0.16" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>
+        <path d="M8.5 12.3l2.4 2.4 4.6-4.9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      Pagamento Seguro
+    </div>
   </header>
 
   <div class="cartao valor">
     <div class="titulo-produto" id="tituloProduto" hidden></div>
     <div class="desc-produto" id="descProduto" hidden></div>
     <div class="rotulo-valor" id="rotuloValor" hidden>Valor a pagar</div>
-    <div class="cifra" id="cifra">PAGAMENTO SEGURO</div>
+    <div class="cifra" id="cifra"></div>
     <div class="entrega-info" id="entregaInfo" hidden></div>
+  </div>
+
+  <div class="cartao-confianca">
+    <h3>Usamos seus dados de forma 100% segura para garantir a sua satisfação:</h3>
+    <ul class="lista-confianca">
+      <li>
+        <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="10" cy="10" r="9" fill="var(--ok)" fill-opacity="0.18"/><path d="M6 10.3l2.4 2.4L14.2 7" stroke="var(--ok)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span>Confirmar seu pagamento e organizar a entrega;</span>
+      </li>
+      <li>
+        <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="10" cy="10" r="9" fill="var(--ok)" fill-opacity="0.18"/><path d="M6 10.3l2.4 2.4L14.2 7" stroke="var(--ok)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span>Ativar a sua garantia de devolução caso não fique satisfeito.</span>
+      </li>
+    </ul>
+    <div class="cartao-privacidade">
+      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="5" y="10.5" width="14" height="9.5" rx="2" stroke="currentColor" stroke-width="1.4"/><path d="M8 10.5V7.5a4 4 0 018 0v3" stroke="currentColor" stroke-width="1.4"/></svg>
+      <p>Seus dados não ficam guardados neste site. Ao tocar no botão, eles vão direto para o WhatsApp da MESCO, usados apenas para identificar seu pagamento e organizar a entrega.</p>
+    </div>
   </div>
 
   <div class="etapas">
@@ -480,10 +523,6 @@
       <div style="margin-top:24px" class="moldura"><canvas id="qrCliente" aria-label="QR Code do pagamento"></canvas></div>
 
       <button class="btn-principal" id="enviar" style="width:100%;margin-top:24px">Confirmar pagamento no WhatsApp</button>
-
-      <p class="privacidade">
-        Seus dados não ficam guardados neste site. Ao tocar no botão, eles vão direto para o WhatsApp da MESCO, usados apenas para identificar seu pagamento e organizar a entrega.
-      </p>
     </section>
 
   </div>
@@ -811,8 +850,8 @@
       $('cifra').textContent = moeda(valor);
       $('rotuloValor').hidden = false;
     } else {
-      $('cifra').textContent = 'PAGAMENTO SEGURO';
-      $('cifra').style.fontSize = '26px';
+      $('cifra').textContent = 'Valor combinado com a loja';
+      $('cifra').classList.add('combinar');
       if(!dados.desc){
         const d = $('descProduto');
         d.textContent = 'O valor aparece na tela do seu banco ao confirmar.';
