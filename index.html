@@ -421,7 +421,7 @@
 </div>
 
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props="{&quot;whatsappNumber&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;5518998016365&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+<script type="text/x-dc" data-dc-script data-props="{&quot;whatsappNumber&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;5518996456092&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
 class Component extends DCLogic {
   state = {
     scrolled: false, scrollFrac: 0, waVisible: false, isMobile: false, mobileMenuOpen: false,
@@ -624,7 +624,7 @@ class Component extends DCLogic {
   }
 
   renderVals() {
-    const num = (this.props.whatsappNumber || '5518998016365').replace(/\D/g, '');
+    const num = (this.props.whatsappNumber || '5518996456092').replace(/\D/g, '');
     const msg = 'Olá, MESCO! Quero pedir um orçamento de peça usada.';
     const waLink = 'https://wa.me/' + num + '?text=' + encodeURIComponent(msg);
 
