@@ -312,12 +312,6 @@
     border-radius:var(--radius-sm);font-family:ui-monospace,Menlo,Consolas,monospace;
     font-size:14px;line-height:1.7;letter-spacing:.02em;padding:14px 15px;word-break:break-all;color:var(--osso);
   }
-  .venc-aviso{
-    margin-top:14px;padding:12px 15px;border-radius:var(--radius-sm);
-    background:#1A1503;border-left:4px solid var(--amarelo);color:#FFE9A3;font-size:13.5px;line-height:1.55;
-  }
-  .venc-aviso.vencido{background:#1B0E0A;border-left-color:var(--alerta);color:#FFC3B4}
-
   @media (prefers-reduced-motion:no-preference){
     .painel-aba.ativa{animation:sobe .22s ease-out}
     .etapa{animation:sobe .28s ease-out}
@@ -523,7 +517,7 @@
     </ul>
     <div class="cartao-privacidade">
       <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="5" y="10.5" width="14" height="9.5" rx="2" stroke="currentColor" stroke-width="1.4"/><path d="M8 10.5V7.5a4 4 0 018 0v3" stroke="currentColor" stroke-width="1.4"/></svg>
-      <p>Seus dados não ficam guardados neste site. Ao tocar no botão, eles vão direto para o WhatsApp da MESCO, usados apenas para identificar seu pagamento e organizar a entrega.</p>
+      <p>Seus dados não ficam guardados neste site. Eles servem apenas para a MESCO identificar seu pagamento e organizar a entrega da sua peça.</p>
     </div>
   </div>
 
@@ -638,10 +632,8 @@
         <div class="barras"><canvas id="barrasCliente" aria-label="Código de barras do boleto"></canvas></div>
         <div class="linha-digitavel" id="linhaCliente"></div>
         <button class="btn-principal" id="copiarBoletoCliente" style="width:100%;margin-top:16px">Copiar linha digitável</button>
-        <div class="venc-aviso" id="vencCliente" hidden></div>
+        <button class="btn-principal" id="enviar" style="width:100%;margin-top:24px">Confirmar pagamento no WhatsApp</button>
       </div>
-
-      <button class="btn-principal" id="enviar" style="width:100%;margin-top:24px">Confirmar pagamento no WhatsApp</button>
     </section>
 
   </div>
@@ -828,7 +820,7 @@
     const centavos = parseInt(barras.substr(9,10),10);
     const valor = centavos > 0 ? (centavos/100).toFixed(2) : '';
     const venc = dataVencimento(barras.substr(5,4));
-    return {ok:true, alerta:alerta, linha:linha, barras:barras, valor:valor, venc:venc};
+    return {ok:true, linha:linha, barras:barras, valor:valor, venc:venc};
   }
 
   /* Código de barras padrão boleto: Intercalado 2 de 5 (ITF), 44 dígitos */
@@ -1014,7 +1006,6 @@
       if(!r.ok) return erro(r.erro);
 
       aviso.className = 'aviso';
-      if(r.alerta) alerta(r.alerta);
 
       ultimoBoleto = r;
       ultimoPayload = '';
@@ -1033,8 +1024,7 @@
         const cls = (r.valor && i===0) ? ' class="destaque"' : '';
         return '<div class="item"><dt>'+l[0]+'</dt><dd'+cls+'>'+
                String(l[1]).replace(/[<>&]/g,'')+'</dd></div>';
-      }).join('') +
-      '<div class="conferido"><span>✓</span><span>Confira o valor e o vencimento antes de mandar ao cliente.</span></div>';
+      }).join('');
 
       $('resultadoBoleto').hidden = false;
       $('blocoLink').hidden = false;
@@ -1228,17 +1218,6 @@
       if(bol && bol.ok){
         desenharBarras($('barrasCliente'), bol.barras);
         $('linhaCliente').textContent = formataLinha(bol.linha);
-        if(bol.venc){
-          const hoje = new Date();
-          const hojeUTC = Date.UTC(hoje.getFullYear(), hoje.getMonth(), hoje.getDate());
-          const venceu = bol.venc.getTime() < hojeUTC;
-          const av = $('vencCliente');
-          av.textContent = venceu
-            ? 'Este boleto venceu em ' + dataBR(bol.venc) + '. Chame a loja no WhatsApp para receber um boleto novo.'
-            : 'Pague até ' + dataBR(bol.venc) + '. Depois do vencimento o boleto pode ser recusado pelo banco.';
-          av.className = 'venc-aviso' + (venceu ? ' vencido' : '');
-          av.hidden = false;
-        }
       }
     } else {
       $('codigoPix').textContent = dados.payload;
@@ -1362,6 +1341,23 @@
     });
 
     /* ---- etapa 3: pagamento ---- */
+    $('enviar').addEventListener('click', function(){
+      const linhas = [
+        'Olá! Paguei o boleto.','',
+        'Nome: ' + nomeCliente,
+        'WhatsApp: ' + foneCliente,
+        'E-mail: ' + emailCliente,
+        'Peça: ' + (dados.titulo || 'não informada')
+      ];
+      if(valorFinal && !isNaN(parseFloat(valorFinal))) linhas.push('Valor: ' + moeda(valorFinal));
+      if(bol && bol.ok) linhas.push('Boleto: ' + formataLinha(bol.linha));
+      if(entregaResumo) linhas.push('Forma de entrega combinada: ' + entregaResumo);
+      linhas.push('Endereço para entrega: ' + enderecoResumo);
+      linhas.push('', 'Aguardo a confirmação por aí.');
+
+      window.open('https://wa.me/' + WHATSAPP_LOJA + '?text=' + encodeURIComponent(linhas.join('\n')), '_blank');
+    });
+
     $('copiarBoletoCliente').addEventListener('click', function(){
       if(!bol || !bol.ok) return;
       const b=this;
@@ -1379,22 +1375,6 @@
       });
     });
 
-    $('enviar').addEventListener('click', function(){
-      const linhas = [
-        ehBoleto ? 'Olá! Paguei o boleto.' : 'Olá! Fiz o pagamento.','',
-        'Nome: ' + nomeCliente,
-        'WhatsApp: ' + foneCliente,
-        'E-mail: ' + emailCliente,
-        'Peça: ' + (dados.titulo || 'não informada')
-      ];
-      if(valorFinal && !isNaN(parseFloat(valorFinal))) linhas.push('Valor: ' + moeda(valorFinal));
-      if(ehBoleto && bol && bol.ok) linhas.push('Boleto: ' + formataLinha(bol.linha));
-      if(entregaResumo) linhas.push('Forma de entrega combinada: ' + entregaResumo);
-      linhas.push('Endereço para entrega: ' + enderecoResumo);
-      linhas.push('', 'Aguardo a confirmação por aí.');
-
-      window.open('https://wa.me/' + WHATSAPP_LOJA + '?text=' + encodeURIComponent(linhas.join('\n')), '_blank');
-    });
   }
 
 })();
