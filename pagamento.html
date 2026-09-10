@@ -166,10 +166,15 @@
   .nav-abas{display:flex;gap:10px;margin-top:24px}
 
   .selo-loja{
-    position:relative;margin-top:2px;font-size:13px;color:var(--ok);
+    position:relative;margin-top:2px;font-size:12.5px;font-weight:700;color:var(--ok);
+    text-transform:uppercase;letter-spacing:.08em;
     display:flex;align-items:center;justify-content:center;gap:6px;
   }
   .selo-loja::before{content:"✓";font-weight:700}
+  .garantia{
+    position:relative;margin-top:10px;font-size:12.5px;color:var(--cinza);
+    max-width:34ch;margin-left:auto;margin-right:auto;line-height:1.5;
+  }
 
   .rodape-checkout{
     margin-top:32px;padding:24px 4px 4px;border-top:1px solid var(--aco);
@@ -357,14 +362,15 @@
   <header class="hero">
     <img id="logoCheckout" class="logo-hero" alt="MESCO Peças Usadas — desde 1961" width="150" height="150">
     <div class="hero-marca">MESCO Peças Usadas</div>
-    <div class="selo-loja">Pagamento seguro</div>
+    <div class="selo-loja">PAGAMENTO SEGURO</div>
+    <p class="garantia">Se a peça não chegar até você, seu dinheiro é devolvido.</p>
   </header>
 
   <div class="cartao valor">
     <div class="titulo-produto" id="tituloProduto" hidden></div>
     <div class="desc-produto" id="descProduto" hidden></div>
     <div class="rotulo-valor" id="rotuloValor" hidden>Valor a pagar</div>
-    <div class="cifra" id="cifra">Pagamento</div>
+    <div class="cifra" id="cifra">PAGAMENTO SEGURO</div>
     <div class="entrega-info" id="entregaInfo" hidden></div>
   </div>
 
@@ -473,7 +479,7 @@
 
       <div style="margin-top:24px" class="moldura"><canvas id="qrCliente" aria-label="QR Code do pagamento"></canvas></div>
 
-      <button class="btn-principal" id="enviar" style="width:100%;margin-top:24px">Enviar comprovante no WhatsApp</button>
+      <button class="btn-principal" id="enviar" style="width:100%;margin-top:24px">Confirmar pagamento no WhatsApp</button>
 
       <p class="privacidade">
         Seus dados não ficam guardados neste site. Ao tocar no botão, eles vão direto para o WhatsApp da MESCO, usados apenas para identificar seu pagamento e organizar a entrega.
@@ -805,8 +811,8 @@
       $('cifra').textContent = moeda(valor);
       $('rotuloValor').hidden = false;
     } else {
-      $('cifra').textContent = 'Pagamento';
-      $('cifra').style.fontSize = '32px';
+      $('cifra').textContent = 'PAGAMENTO SEGURO';
+      $('cifra').style.fontSize = '26px';
       if(!dados.desc){
         const d = $('descProduto');
         d.textContent = 'O valor aparece na tela do seu banco ao confirmar.';
@@ -963,7 +969,7 @@
       if(valor && !isNaN(parseFloat(valor))) linhas.push('Valor: ' + moeda(valor));
       if(entregaResumo) linhas.push('Forma de entrega combinada: ' + entregaResumo);
       linhas.push('Endereço para entrega: ' + enderecoResumo);
-      linhas.push('', 'Vou enviar o comprovante a seguir.');
+      linhas.push('', 'Aguardo a confirmação por aí.');
 
       window.open('https://wa.me/' + WHATSAPP_LOJA + '?text=' + encodeURIComponent(linhas.join('\n')), '_blank');
     });
