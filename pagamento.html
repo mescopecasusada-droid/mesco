@@ -166,13 +166,13 @@
   .nav-abas{display:flex;gap:10px;margin-top:24px}
 
   .badge-seguro{
-    position:relative;display:inline-flex;align-items:center;gap:7px;
-    margin-top:4px;padding:7px 14px 7px 10px;border-radius:999px;
-    background:rgba(235,230,25,0.08);border:1px solid rgba(235,230,25,0.35);
-    font-size:12px;font-weight:700;color:var(--amarelo);
-    text-transform:uppercase;letter-spacing:.09em;
+    position:relative;display:inline-flex;align-items:center;gap:9px;
+    margin-top:6px;padding:9px 18px 9px 12px;border-radius:999px;
+    background:rgba(123,209,74,0.12);border:1px solid rgba(123,209,74,0.4);
+    font-size:14.5px;font-weight:800;color:var(--ok);
+    text-transform:uppercase;letter-spacing:.06em;
   }
-  .badge-seguro svg{flex:0 0 auto;width:16px;height:16px}
+  .badge-seguro svg{flex:0 0 auto;width:22px;height:22px;color:var(--ok)}
   .cartao-confianca{
     background:var(--card);border:1px dashed var(--aco);border-radius:var(--radius);
     padding:22px 22px;margin-top:20px;
@@ -213,6 +213,38 @@
     font-family:'Archivo',sans-serif;font-size:44px;font-weight:800;color:var(--amarelo);line-height:1;
   }
   .valor .cifra.combinar{font-size:20px;font-weight:700;color:var(--osso)}
+
+  /* ---------- carrinho (resumo estilo carrinho de compra) ---------- */
+  .carrinho-cabecalho{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+  .carrinho-cabecalho h3{font-family:'Archivo',sans-serif;font-size:19px;font-weight:800;color:var(--osso)}
+  .contador{
+    display:inline-flex;align-items:center;justify-content:center;
+    width:28px;height:28px;border-radius:50%;background:var(--ok);color:#0A1A05;
+    font-family:'Archivo',sans-serif;font-size:13px;font-weight:800;flex:0 0 auto;
+  }
+  .carrinho-item{display:flex;gap:14px;align-items:flex-start}
+  .avatar-produto{
+    width:56px;height:56px;border-radius:50%;object-fit:cover;flex:0 0 auto;
+    background:var(--preto);box-shadow:0 0 0 1px var(--aco);
+  }
+  .carrinho-item .titulo-produto{margin-bottom:4px}
+  .carrinho-item .desc-produto{margin-bottom:0;font-size:13.5px}
+  .carrinho-divisor{height:1px;background:var(--aco);margin:20px 0}
+  .linha-resumo{
+    display:flex;justify-content:space-between;align-items:baseline;
+    font-size:14.5px;color:var(--cinza);padding:5px 0;
+  }
+  .linha-resumo span:last-child{color:var(--osso)}
+  .linha-resumo.total{
+    margin-top:6px;padding-top:14px;border-top:1px solid var(--aco);
+  }
+  .linha-resumo.total span{
+    font-family:'Archivo',sans-serif;font-weight:800;font-size:16px;color:var(--osso);
+  }
+  .linha-resumo.total span:last-child{color:var(--amarelo);font-size:23px}
+  .valor-combinar{
+    margin-top:16px;font-size:13.5px;color:var(--cinza);line-height:1.55;
+  }
   .entrega-info{
     margin-top:16px;padding:13px 15px;background:#1C1C18;border:1px solid var(--aco);
     border-left:4px solid var(--ambar);border-radius:var(--radius-sm);
@@ -297,6 +329,11 @@
     <div class="campo">
       <label for="titulo">Título do produto</label>
       <input type="text" id="titulo" placeholder="Farol dianteiro Gol G5" maxlength="70">
+    </div>
+
+    <div class="campo">
+      <label for="valorManual">Valor da peça <span class="opc">opcional — aparece no carrinho do cliente</span></label>
+      <input type="text" id="valorManual" inputmode="decimal" placeholder="209,90" maxlength="12">
     </div>
 
     <div class="campo" style="margin-bottom:0">
@@ -387,15 +424,32 @@
         <path d="M12 2l7.5 3.2v5.4c0 5-3.2 8.9-7.5 10.4-4.3-1.5-7.5-5.4-7.5-10.4V5.2L12 2z" fill="currentColor" fill-opacity="0.16" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>
         <path d="M8.5 12.3l2.4 2.4 4.6-4.9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
-      Pagamento Seguro
+      Pagamento 100% Seguro
     </div>
   </header>
 
   <div class="cartao valor">
-    <div class="titulo-produto" id="tituloProduto" hidden></div>
-    <div class="desc-produto" id="descProduto" hidden></div>
-    <div class="rotulo-valor" id="rotuloValor" hidden>Valor a pagar</div>
-    <div class="cifra" id="cifra"></div>
+    <div class="carrinho-cabecalho">
+      <h3>Seu carrinho</h3>
+      <span class="contador">1</span>
+    </div>
+    <div class="carrinho-item">
+      <img id="avatarProduto" class="avatar-produto" alt="">
+      <div>
+        <div class="titulo-produto" id="tituloProduto" hidden></div>
+        <div class="desc-produto" id="descProduto" hidden></div>
+      </div>
+    </div>
+
+    <div class="carrinho-divisor"></div>
+
+    <div id="blocoValores">
+      <div class="linha-resumo"><span>Subtotal (1x)</span><span id="subtotalValor"></span></div>
+      <div class="linha-resumo"><span>Frete</span><span>—</span></div>
+      <div class="linha-resumo total"><span>Total</span><span id="totalValor"></span></div>
+    </div>
+    <p class="valor-combinar" id="valorCombinar" hidden>O valor é combinado direto com a loja e aparece na tela do seu banco ao confirmar.</p>
+
     <div class="entrega-info" id="entregaInfo" hidden></div>
   </div>
 
@@ -673,6 +727,7 @@
       payload: payloadLink,
       titulo: deB64(params.get('t')),
       desc: deB64(params.get('d')),
+      valorManual: params.get('v') || '',
       entregaTipo: params.get('et') || '',
       entregaObs: deB64(params.get('eo'))
     });
@@ -769,7 +824,7 @@
 
     $('limpar').addEventListener('click', function(){
       campo.value='';
-      $('titulo').value=''; $('descProd').value=''; $('obsEntrega').value='';
+      $('titulo').value=''; $('descProd').value=''; $('obsEntrega').value=''; $('valorManual').value='';
       $('tipoEntrega').value='retirada';
       aviso.className='aviso'; resultado.hidden = true;
       $('url').classList.remove('visivel'); $('testarLink').hidden = true;
@@ -799,11 +854,13 @@
 
       const titulo = $('titulo').value.trim();
       const desc = $('descProd').value.trim();
+      const valorManual = $('valorManual').value.trim().replace(/\./g,'').replace(',', '.');
       const tipoEnt = $('tipoEntrega').value;
       const obsEnt = $('obsEntrega').value.trim();
 
       if(titulo) partes.push('t=' + paraB64(titulo));
       if(desc) partes.push('d=' + paraB64(desc));
+      if(valorManual && !isNaN(parseFloat(valorManual))) partes.push('v=' + parseFloat(valorManual).toFixed(2));
       if(obsEnt || tipoEnt !== 'retirada'){
         partes.push('et=' + tipoEnt);
         if(obsEnt) partes.push('eo=' + paraB64(obsEnt));
@@ -845,18 +902,18 @@
       const d = $('descProduto');
       d.textContent = dados.desc; d.hidden = false;
     }
+    $('avatarProduto').src = LOGO;
 
-    if(valor && moeda(valor)){
-      $('cifra').textContent = moeda(valor);
-      $('rotuloValor').hidden = false;
+    const valorFinal = (valor && moeda(valor)) ? valor
+      : (dados.valorManual && !isNaN(parseFloat(dados.valorManual))) ? dados.valorManual
+      : '';
+
+    if(valorFinal && moeda(valorFinal)){
+      $('subtotalValor').textContent = moeda(valorFinal);
+      $('totalValor').textContent = moeda(valorFinal);
     } else {
-      $('cifra').textContent = 'Valor combinado com a loja';
-      $('cifra').classList.add('combinar');
-      if(!dados.desc){
-        const d = $('descProduto');
-        d.textContent = 'O valor aparece na tela do seu banco ao confirmar.';
-        d.hidden = false;
-      }
+      $('blocoValores').hidden = true;
+      $('valorCombinar').hidden = false;
     }
 
     let entregaResumo = '';
@@ -1005,7 +1062,7 @@
         'E-mail: ' + emailCliente,
         'Peça: ' + (dados.titulo || 'não informada')
       ];
-      if(valor && !isNaN(parseFloat(valor))) linhas.push('Valor: ' + moeda(valor));
+      if(valorFinal && !isNaN(parseFloat(valorFinal))) linhas.push('Valor: ' + moeda(valorFinal));
       if(entregaResumo) linhas.push('Forma de entrega combinada: ' + entregaResumo);
       linhas.push('Endereço para entrega: ' + enderecoResumo);
       linhas.push('', 'Aguardo a confirmação por aí.');
