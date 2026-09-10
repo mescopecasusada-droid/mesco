@@ -296,6 +296,28 @@
   .invalido h1{font-size:20px;margin-bottom:10px}
   .invalido p{color:var(--cinza);font-size:15px}
 
+  /* ---------- seletor de método de pagamento ---------- */
+  .metodos{display:flex;gap:8px;margin:0 0 20px}
+  .metodo{
+    flex:1;background:#151512;border:1px solid var(--aco);border-radius:var(--radius-sm);color:var(--cinza);
+    font-family:'Archivo',sans-serif;font-size:13px;font-weight:700;padding:14px 6px;cursor:pointer;min-height:auto;
+    display:flex;align-items:center;justify-content:center;gap:8px;
+  }
+  .metodo svg{width:17px;height:17px;flex:0 0 auto}
+  .metodo.ativa{color:var(--preto);background:var(--amarelo);border-color:var(--amarelo)}
+  .barras{background:#FFFFFF;padding:16px 14px;border-radius:var(--radius-sm);text-align:center}
+  .barras canvas{width:100%;max-width:100%;height:auto;display:block;border-radius:0}
+  .linha-digitavel{
+    margin-top:12px;background:#1C1C18;border:1px solid var(--aco);border-left:4px solid var(--amarelo);
+    border-radius:var(--radius-sm);font-family:ui-monospace,Menlo,Consolas,monospace;
+    font-size:14px;line-height:1.7;letter-spacing:.02em;padding:14px 15px;word-break:break-all;color:var(--osso);
+  }
+  .venc-aviso{
+    margin-top:14px;padding:12px 15px;border-radius:var(--radius-sm);
+    background:#1A1503;border-left:4px solid var(--amarelo);color:#FFE9A3;font-size:13.5px;line-height:1.55;
+  }
+  .venc-aviso.vencido{background:#1B0E0A;border-left-color:var(--alerta);color:#FFC3B4}
+
   @media (prefers-reduced-motion:no-preference){
     .painel-aba.ativa{animation:sobe .22s ease-out}
     .etapa{animation:sobe .28s ease-out}
@@ -371,9 +393,29 @@
   </section>
 
   <section class="painel-aba cartao" id="abaPagamento">
-    <h2 class="secao">Código de pagamento copia e cola</h2>
-    <p class="dica">Cole o código copiado do banco para gerar a cobrança. Funciona com Pix estático e dinâmico.</p>
-    <textarea id="codigo" placeholder="00020126580014BR.GOV.BCB.PIX..." spellcheck="false" autocapitalize="off"></textarea>
+
+    <div class="metodos">
+      <button class="metodo ativa" data-met="pix" type="button">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 3.2l8.8 8.8-8.8 8.8L3.2 12 12 3.2z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+        Pix
+      </button>
+      <button class="metodo" data-met="boleto" type="button">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 5v14M7 5v14M10 5v14M13.5 5v14M17 5v14M20 5v14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        Boleto
+      </button>
+    </div>
+
+    <div id="blocoPix">
+      <h2 class="secao">Código de pagamento copia e cola</h2>
+      <p class="dica">Cole o código copiado do banco para gerar a cobrança. Funciona com Pix estático e dinâmico.</p>
+      <textarea id="codigo" placeholder="00020126580014BR.GOV.BCB.PIX..." spellcheck="false" autocapitalize="off"></textarea>
+    </div>
+
+    <div id="blocoBoleto" hidden>
+      <h2 class="secao">Linha digitável do boleto</h2>
+      <p class="dica">Cole a linha digitável (47 dígitos) ou o código de barras (44 dígitos) gerado no banco. Pode colar com pontos e espaços — eu limpo.</p>
+      <textarea id="codBoleto" style="min-height:96px" placeholder="34191.79001 01043.510047 91020.150008 1 98770000026000" spellcheck="false" autocapitalize="off" inputmode="numeric"></textarea>
+    </div>
 
     <div class="linha">
       <button class="btn-principal" id="gerar">Gerar QR Code</button>
@@ -391,7 +433,21 @@
         <button class="btn-principal" id="baixar">Baixar imagem</button>
         <button class="btn-secundario" id="copiarCod">Copiar código</button>
       </div>
+    </section>
 
+    <section id="resultadoBoleto" hidden aria-live="polite">
+      <div style="margin-top:26px" class="barras"><canvas id="barrasPainel" aria-label="Código de barras do boleto"></canvas></div>
+      <div class="linha-digitavel" id="linhaPainel"></div>
+
+      <dl id="dadosBoleto"></dl>
+
+      <div class="linha">
+        <button class="btn-principal" id="baixarBoleto">Baixar imagem</button>
+        <button class="btn-secundario" id="copiarLinha">Copiar linha digitável</button>
+      </div>
+    </section>
+
+    <div id="blocoLink" hidden>
       <div class="caixa-link">
         <h2 class="secao">Link de pagamento</h2>
         <p>Abre uma página com a logo, o valor, a forma de entrega, o QR Code e um passo a passo — pronta para mandar ao cliente. A prévia do link (imagem, título) já vem pronta com a logo da MESCO.</p>
@@ -402,7 +458,7 @@
           <button class="btn-secundario" id="testarLink" hidden>Abrir para testar</button>
         </div>
       </div>
-    </section>
+    </div>
 
     <div class="nav-abas">
       <button class="btn-secundario" data-ir="entrega">Voltar</button>
@@ -571,10 +627,19 @@
       <h2><b>3</b> Pagamento</h2>
       <p class="dica">Abra o app do banco, escolha Pix, cole o código ou escaneie o QR Code.</p>
 
-      <div class="codigo" id="codigoPix"></div>
-      <button class="btn-principal" id="copiarCliente" style="width:100%">Copiar código de pagamento</button>
+      <div id="pixCliente">
+        <div class="codigo" id="codigoPix"></div>
+        <button class="btn-principal" id="copiarCliente" style="width:100%">Copiar código de pagamento</button>
 
-      <div style="margin-top:24px" class="moldura"><canvas id="qrCliente" aria-label="QR Code do pagamento"></canvas></div>
+        <div style="margin-top:24px" class="moldura"><canvas id="qrCliente" aria-label="QR Code do pagamento"></canvas></div>
+      </div>
+
+      <div id="boletoCliente" hidden>
+        <div class="barras"><canvas id="barrasCliente" aria-label="Código de barras do boleto"></canvas></div>
+        <div class="linha-digitavel" id="linhaCliente"></div>
+        <button class="btn-principal" id="copiarBoletoCliente" style="width:100%;margin-top:16px">Copiar linha digitável</button>
+        <div class="venc-aviso" id="vencCliente" hidden></div>
+      </div>
 
       <button class="btn-principal" id="enviar" style="width:100%;margin-top:24px">Confirmar pagamento no WhatsApp</button>
     </section>
@@ -687,6 +752,117 @@
     return campos;
   }
 
+  /* =================================================================
+     BOLETO — linha digitável, validação e código de barras
+     ================================================================= */
+  function soDigitos(v){ return String(v||'').replace(/\D/g,''); }
+
+  function mod10(bloco){
+    let soma = 0, peso = 2;
+    for(let i = bloco.length - 1; i >= 0; i--){
+      let n = parseInt(bloco[i],10) * peso;
+      if(n > 9) n = Math.floor(n/10) + (n%10);
+      soma += n; peso = (peso === 2) ? 1 : 2;
+    }
+    return (10 - (soma % 10)) % 10;
+  }
+
+  function mod11Barras(barras43){
+    let soma = 0, peso = 2;
+    for(let i = barras43.length - 1; i >= 0; i--){
+      soma += parseInt(barras43[i],10) * peso;
+      peso = (peso === 9) ? 2 : peso + 1;
+    }
+    const resto = soma % 11, dv = 11 - resto;
+    return (dv === 0 || dv === 1 || dv === 10 || dv === 11) ? 1 : dv;
+  }
+
+  function linhaParaBarras(l){
+    return l.substr(0,4) + l.substr(32,1) + l.substr(33,4) + l.substr(37,10) +
+           l.substr(4,5) + l.substr(10,10) + l.substr(21,10);
+  }
+  function barrasParaLinha(b){
+    const c1 = b.substr(0,4) + b.substr(19,5);
+    const c2 = b.substr(24,10);
+    const c3 = b.substr(34,10);
+    return c1 + mod10(c1) + c2 + mod10(c2) + c3 + mod10(c3) + b.substr(4,1) + b.substr(5,14);
+  }
+  function formataLinha(l){
+    if(l.length !== 47) return l;
+    return l.substr(0,5)+'.'+l.substr(5,5)+' '+l.substr(10,5)+'.'+l.substr(15,6)+' '+
+           l.substr(21,5)+'.'+l.substr(26,6)+' '+l.substr(32,1)+' '+l.substr(33,14);
+  }
+  function dataVencimento(fator){
+    const f = parseInt(fator,10);
+    if(!f || f === 0) return null;
+    const base = Date.UTC(1997,9,7);
+    const d = new Date(base + f*86400000);
+    return d;
+  }
+  function dataBR(d){
+    return String(d.getUTCDate()).padStart(2,'0')+'/'+
+           String(d.getUTCMonth()+1).padStart(2,'0')+'/'+d.getUTCFullYear();
+  }
+
+  /* Interpreta o que foi colado. Devolve {ok, erro, alerta, linha, barras, valor, venc} */
+  function lerBoleto(bruto){
+    const d = soDigitos(bruto);
+    if(!d) return {ok:false, erro:'Cole a linha digitável do boleto no campo acima.'};
+    if(d.length === 48 || (d.length === 47 && d[0] === '8'))
+      return {ok:false, erro:'Isso é um boleto de concessionária/tributo (começa com 8). Esta página trabalha com boleto bancário de 47 dígitos.'};
+    if(d.length !== 47 && d.length !== 44)
+      return {ok:false, erro:'O boleto precisa ter 47 dígitos (linha digitável) ou 44 (código de barras). Você colou ' + d.length + '.'};
+
+    let linha, barras, alerta = '';
+    if(d.length === 47){
+      linha = d; barras = linhaParaBarras(d);
+      const c1 = d.substr(0,9), c2 = d.substr(10,10), c3 = d.substr(21,10);
+      if(mod10(c1) !== +d[9] || mod10(c2) !== +d[20] || mod10(c3) !== +d[31])
+        alerta = 'Os dígitos verificadores dos campos não conferem — parece que faltou ou sobrou algum número. Confira antes de mandar.';
+    } else {
+      barras = d; linha = barrasParaLinha(d);
+    }
+    if(!alerta && mod11Barras(barras.substr(0,4) + barras.substr(5)) !== +barras[4])
+      alerta = 'O dígito verificador geral não confere. Gerei mesmo assim, mas teste no app do banco antes de mandar ao cliente.';
+
+    const centavos = parseInt(barras.substr(9,10),10);
+    const valor = centavos > 0 ? (centavos/100).toFixed(2) : '';
+    const venc = dataVencimento(barras.substr(5,4));
+    return {ok:true, alerta:alerta, linha:linha, barras:barras, valor:valor, venc:venc};
+  }
+
+  /* Código de barras padrão boleto: Intercalado 2 de 5 (ITF), 44 dígitos */
+  const ITF = ['00110','10001','01001','11000','00101','10100','01100','00011','10010','01010'];
+  function desenharBarras(canvas, barras44){
+    const bits = [];
+    const push = function(p, largo){ for(let i=0;i<p.length;i++) bits.push([p[i]==='1', largo]); };
+    // start
+    push('0000', false);
+    for(let i=0;i<barras44.length;i+=2){
+      const a = ITF[+barras44[i]], b = ITF[+barras44[i+1]];
+      for(let k=0;k<5;k++){
+        bits.push([true,  a[k]==='1']);   // barra
+        bits.push([false, b[k]==='1']);   // espaço
+      }
+    }
+    // stop
+    bits.push([true,true]); bits.push([false,false]); bits.push([true,false]);
+
+    const fino = 2, grosso = fino*3, altura = 150, margem = fino*10;
+    let largura = margem*2;
+    bits.forEach(function(b){ largura += b[1] ? grosso : fino; });
+    canvas.width = largura; canvas.height = altura + margem;
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#FFFFFF'; ctx.fillRect(0,0,canvas.width,canvas.height);
+    ctx.fillStyle = '#000000';
+    let x = margem;
+    bits.forEach(function(b){
+      const w = b[1] ? grosso : fino;
+      if(b[0]) ctx.fillRect(x, margem/2, w, altura);
+      x += w;
+    });
+  }
+
   function desenhar(canvas, texto){
     const qr = qrcode(0,'H');
     qr.addData(texto); qr.make();
@@ -746,8 +922,22 @@
   const params = new URLSearchParams(location.hash.slice(1));
   const payloadLink = deB64(params.get('p'));
 
-  if(payloadLink && payloadLink.startsWith('000201')){
+  const boletoLink = deB64(params.get('b'));
+
+  if(boletoLink && /^\d{47}$/.test(boletoLink)){
     modoCheckout({
+      metodo: 'boleto',
+      boleto: boletoLink,
+      payload: '',
+      titulo: deB64(params.get('t')),
+      desc: deB64(params.get('d')),
+      valorManual: params.get('v') || '',
+      entregaTipo: params.get('et') || '',
+      entregaObs: deB64(params.get('eo'))
+    });
+  } else if(payloadLink && payloadLink.startsWith('000201')){
+    modoCheckout({
+      metodo: 'pix',
       payload: payloadLink,
       titulo: deB64(params.get('t')),
       desc: deB64(params.get('d')),
@@ -788,6 +978,28 @@
     const canvas = $('qrPainel');
     let nomeArquivo = 'pagamento-mesco';
     let ultimoPayload = '';
+    let ultimoBoleto = null;
+    let metodo = 'pix';
+
+    /* ---- alternar Pix / Boleto ---- */
+    function trocarMetodo(m){
+      metodo = m;
+      document.querySelectorAll('.metodo').forEach(function(b){
+        b.classList.toggle('ativa', b.dataset.met === m);
+      });
+      $('blocoPix').hidden = (m !== 'pix');
+      $('blocoBoleto').hidden = (m !== 'boleto');
+      $('gerar').textContent = (m === 'pix') ? 'Gerar QR Code' : 'Gerar boleto';
+      $('resultado').hidden = true;
+      $('resultadoBoleto').hidden = true;
+      $('blocoLink').hidden = true;
+      $('url').classList.remove('visivel');
+      $('testarLink').hidden = true;
+      aviso.className = 'aviso';
+    }
+    document.querySelectorAll('.metodo').forEach(function(b){
+      b.addEventListener('click', function(){ trocarMetodo(b.dataset.met); });
+    });
 
     function erro(msg){
       aviso.textContent = msg; aviso.className = 'aviso visivel';
@@ -797,7 +1009,39 @@
       aviso.textContent = msg; aviso.className = 'aviso atencao visivel';
     }
 
+    function gerarBoleto(){
+      const r = lerBoleto($('codBoleto').value);
+      if(!r.ok) return erro(r.erro);
+
+      aviso.className = 'aviso';
+      if(r.alerta) alerta(r.alerta);
+
+      ultimoBoleto = r;
+      ultimoPayload = '';
+      nomeArquivo = 'boleto-mesco' + (r.valor ? '-' + r.valor.replace('.','-') : '');
+
+      desenharBarras($('barrasPainel'), r.barras);
+      $('linhaPainel').textContent = formataLinha(r.linha);
+
+      const linhas = [];
+      if(r.valor) linhas.push(['Valor', moeda(r.valor)]);
+      linhas.push(['Vencimento', r.venc ? dataBR(r.venc) : 'sem vencimento no código']);
+      linhas.push(['Banco emissor', r.barras.substr(0,3)]);
+      linhas.push(['Código de barras', r.barras]);
+
+      $('dadosBoleto').innerHTML = linhas.map(function(l,i){
+        const cls = (r.valor && i===0) ? ' class="destaque"' : '';
+        return '<div class="item"><dt>'+l[0]+'</dt><dd'+cls+'>'+
+               String(l[1]).replace(/[<>&]/g,'')+'</dd></div>';
+      }).join('') +
+      '<div class="conferido"><span>✓</span><span>Confira o valor e o vencimento antes de mandar ao cliente.</span></div>';
+
+      $('resultadoBoleto').hidden = false;
+      $('blocoLink').hidden = false;
+    }
+
     function gerar(){
+      if(metodo === 'boleto') return gerarBoleto();
       const texto = normaliza(campo.value);
       if(!texto) return erro('Cole o código de pagamento copia e cola no campo acima.');
       if(!texto.startsWith('000201'))
@@ -840,17 +1084,21 @@
       }).join('') +
       '<div class="conferido"><span>✓</span><span>Confira o recebedor acima: precisa ser a conta da MESCO.</span></div>';
 
+      ultimoBoleto = null;
       resultado.hidden = false;
       resultado.classList.add('visivel');
+      $('blocoLink').hidden = false;
     }
 
     $('gerar').addEventListener('click', gerar);
 
     $('limpar').addEventListener('click', function(){
-      campo.value='';
+      campo.value=''; $('codBoleto').value='';
       $('titulo').value=''; $('descProd').value=''; $('obsEntrega').value=''; $('valorManual').value='';
       $('tipoEntrega').value='retirada';
-      aviso.className='aviso'; resultado.hidden = true;
+      aviso.className='aviso'; resultado.hidden = true; $('resultadoBoleto').hidden = true;
+      ultimoBoleto = null; ultimoPayload = '';
+      $('blocoLink').hidden = true;
       $('url').classList.remove('visivel'); $('testarLink').hidden = true;
       irPara('produto');
       campo.focus();
@@ -871,10 +1119,28 @@
       });
     });
 
+    $('baixarBoleto').addEventListener('click', function(){
+      const a=document.createElement('a');
+      a.download = nomeArquivo + '.png';
+      a.href = $('barrasPainel').toDataURL('image/png');
+      a.click();
+    });
+
+    $('copiarLinha').addEventListener('click', function(){
+      if(!ultimoBoleto) return;
+      const b=this;
+      navigator.clipboard.writeText(ultimoBoleto.linha).then(function(){
+        b.textContent='Linha copiada';
+        setTimeout(function(){ b.textContent='Copiar linha digitável'; },1800);
+      });
+    });
+
     $('criarLink').addEventListener('click', function(){
-      if(!ultimoPayload) return;
+      if(!ultimoPayload && !ultimoBoleto) return;
       const base = location.origin + location.pathname;
-      const partes = ['p=' + paraB64(ultimoPayload)];
+      const partes = ultimoBoleto
+        ? ['b=' + paraB64(ultimoBoleto.linha)]
+        : ['p=' + paraB64(ultimoPayload)];
 
       const titulo = $('titulo').value.trim();
       const desc = $('descProd').value.trim();
@@ -884,7 +1150,8 @@
 
       if(titulo) partes.push('t=' + paraB64(titulo));
       if(desc) partes.push('d=' + paraB64(desc));
-      if(!isNaN(valorManual) && valorManual > 0) partes.push('v=' + valorManual.toFixed(2));
+      if(ultimoBoleto && ultimoBoleto.valor) partes.push('v=' + ultimoBoleto.valor);
+      else if(!isNaN(valorManual) && valorManual > 0) partes.push('v=' + valorManual.toFixed(2));
       if(obsEnt || tipoEnt !== 'retirada'){
         partes.push('et=' + tipoEnt);
         if(obsEnt) partes.push('eo=' + paraB64(obsEnt));
@@ -898,7 +1165,8 @@
       $('testarLink').onclick = function(){ window.open(link,'_blank'); };
 
       const kb = Math.round(link.length/1024);
-      $('tamLink').textContent = 'Link com ' + kb + ' KB — bem leve. A prévia no WhatsApp usa a logo fixa da MESCO.';
+      $('tamLink').textContent = 'Link de ' + (ultimoBoleto ? 'boleto' : 'Pix') + ' com ' + kb +
+        ' KB — bem leve. A prévia no WhatsApp usa a logo fixa da MESCO.';
 
       const b = this;
       navigator.clipboard.writeText(link).then(function(){
@@ -915,8 +1183,10 @@
   function modoCheckout(dados){
     $('checkout').hidden = false;
 
-    const campos = lerTLV(dados.payload);
-    const valor = campos['54'] || '';
+    const ehBoleto = (dados.metodo === 'boleto');
+    const bol = ehBoleto ? lerBoleto(dados.boleto) : null;
+    const campos = ehBoleto ? {} : lerTLV(dados.payload);
+    const valor = ehBoleto ? (bol && bol.ok ? bol.valor : '') : (campos['54'] || '');
 
     if(dados.titulo){
       const t = $('tituloProduto');
@@ -950,7 +1220,29 @@
       info.hidden = false;
     }
 
-    $('codigoPix').textContent = dados.payload;
+    if(ehBoleto){
+      $('pixCliente').hidden = true;
+      $('boletoCliente').hidden = false;
+      $('etapa3').querySelector('p.dica').textContent =
+        'Abra o app do banco, escolha "Pagar boleto" e cole a linha digitável abaixo — ou escaneie o código de barras.';
+      if(bol && bol.ok){
+        desenharBarras($('barrasCliente'), bol.barras);
+        $('linhaCliente').textContent = formataLinha(bol.linha);
+        if(bol.venc){
+          const hoje = new Date();
+          const hojeUTC = Date.UTC(hoje.getFullYear(), hoje.getMonth(), hoje.getDate());
+          const venceu = bol.venc.getTime() < hojeUTC;
+          const av = $('vencCliente');
+          av.textContent = venceu
+            ? 'Este boleto venceu em ' + dataBR(bol.venc) + '. Chame a loja no WhatsApp para receber um boleto novo.'
+            : 'Pague até ' + dataBR(bol.venc) + '. Depois do vencimento o boleto pode ser recusado pelo banco.';
+          av.className = 'venc-aviso' + (venceu ? ' vencido' : '');
+          av.hidden = false;
+        }
+      }
+    } else {
+      $('codigoPix').textContent = dados.payload;
+    }
 
     /* ---------------- controle das fases ---------------- */
     const etapa1 = $('etapa1'), etapa2 = $('etapa2'), etapa3 = $('etapa3');
@@ -1060,7 +1352,7 @@
 
       etapa2.hidden = true; resumo2.hidden = false;
       etapa3.hidden = false;
-      if(!qrDesenhado){ desenhar($('qrCliente'), dados.payload); qrDesenhado = true; }
+      if(!qrDesenhado && !ehBoleto){ desenhar($('qrCliente'), dados.payload); qrDesenhado = true; }
       etapa3.scrollIntoView({behavior:'smooth', block:'start'});
     });
 
@@ -1070,6 +1362,15 @@
     });
 
     /* ---- etapa 3: pagamento ---- */
+    $('copiarBoletoCliente').addEventListener('click', function(){
+      if(!bol || !bol.ok) return;
+      const b=this;
+      navigator.clipboard.writeText(bol.linha).then(function(){
+        b.textContent='Linha copiada';
+        setTimeout(function(){ b.textContent='Copiar linha digitável'; },2000);
+      });
+    });
+
     $('copiarCliente').addEventListener('click', function(){
       const b=this;
       navigator.clipboard.writeText(dados.payload).then(function(){
@@ -1080,13 +1381,14 @@
 
     $('enviar').addEventListener('click', function(){
       const linhas = [
-        'Olá! Fiz o pagamento.','',
+        ehBoleto ? 'Olá! Paguei o boleto.' : 'Olá! Fiz o pagamento.','',
         'Nome: ' + nomeCliente,
         'WhatsApp: ' + foneCliente,
         'E-mail: ' + emailCliente,
         'Peça: ' + (dados.titulo || 'não informada')
       ];
       if(valorFinal && !isNaN(parseFloat(valorFinal))) linhas.push('Valor: ' + moeda(valorFinal));
+      if(ehBoleto && bol && bol.ok) linhas.push('Boleto: ' + formataLinha(bol.linha));
       if(entregaResumo) linhas.push('Forma de entrega combinada: ' + entregaResumo);
       linhas.push('Endereço para entrega: ' + enderecoResumo);
       linhas.push('', 'Aguardo a confirmação por aí.');
